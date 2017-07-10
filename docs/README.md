@@ -1,3 +1,1 @@
-# Faux OS API Documentation
-
-+ [Userspace](./userspace)
+# [Userspace](./userspace)
