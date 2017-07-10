@@ -1,3 +1,1 @@
-# Userspace
-
-+ [System call interface](./sys.md)
+# [System call interface](./sys.md)
