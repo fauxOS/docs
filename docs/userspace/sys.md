@@ -4,9 +4,12 @@
 
 -   [spawn](#spawn)
 -   [exec](#exec)
--   [access](#access)
+-   [exists](#exists)
 -   [stat](#stat)
 -   [open](#open)
+-   [close](#close)
+-   [dup](#dup)
+-   [dup2](#dup2)
 -   [read](#read)
 -   [write](#write)
 -   [pwd](#pwd)
@@ -23,6 +26,12 @@ Spawn a new process from an executable image
 -   `image` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** The executable code to run (optional, default `""`)
 -   `argv` **[array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)** Argument vector for the new process (optional, default `[]`)
 
+**Examples**
+
+```javascript
+sys.spawn("console.log(argv)", ["hello", "world"])
+```
+
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** pid - The ID of the new process
 
 ## exec
@@ -31,18 +40,30 @@ Spawn a new process from a path
 
 **Parameters**
 
--   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** The executable code file's path (optional, default `""`)
+-   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** The executable code file's path
 -   `argv` **[array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)**  (optional, default `[]`)
+
+**Examples**
+
+```javascript
+sys.exec("/bin/ls", ["ls", "-a"])
+```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** pid
 
-## access
+## exists
 
 Check if a file exists
 
 **Parameters**
 
--   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `""`)
+-   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+**Examples**
+
+```javascript
+const exists = await sys.exists("/file")
+```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
 
@@ -52,7 +73,13 @@ Get file/directory info
 
 **Parameters**
 
--   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `""`)
+-   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+**Examples**
+
+```javascript
+const info = await sys.stat("/file")
+```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)>** 
 
@@ -62,10 +89,63 @@ Open a file/directory to get its file descriptor
 
 **Parameters**
 
--   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `""`)
+-   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `mode`   (optional, default `"r"`)
 
+**Examples**
+
+```javascript
+const fd = await sys.open("/file")
+```
+
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** fd - new file descriptor
+
+## close
+
+Close a file descriptor from use
+
+**Parameters**
+
+-   `fd` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+**Examples**
+
+```javascript
+sys.close(3)
+```
+
+## dup
+
+Duplicate a file descriptor
+
+**Parameters**
+
+-   `fd` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** File descriptor to copy
+
+**Examples**
+
+```javascript
+const copied = await sys.dup(0)
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** duplicated file descriptor
+
+## dup2
+
+Duplicate a file descriptor to a new location, possibly overwriting one
+
+**Parameters**
+
+-   `fd1` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** File descriptor to copy
+-   `fd2` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** Target to copy to
+
+**Examples**
+
+```javascript
+sys.dup2(1, 2)
+```
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** Second file descriptor
 
 ## read
 
@@ -74,6 +154,12 @@ Read file contents from a file descriptor
 **Parameters**
 
 -   `fd` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+**Examples**
+
+```javascript
+const contents = await sys.read(fd)
+```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>** data - file contents
 
@@ -86,9 +172,21 @@ Write data to a file descriptor
 -   `fd` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `data` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** new file contents (optional, default `""`)
 
+**Examples**
+
+```javascript
+sys.write(1, "hello world")
+```
+
 ## pwd
 
 Get the currect working directory
+
+**Examples**
+
+```javascript
+const cwd = await sys.pwd()
+```
 
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>** current working directory
 
@@ -98,7 +196,13 @@ Change the working directory
 
 **Parameters**
 
--   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** new working directory (optional, default `""`)
+-   `path` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** new working directory (optional, default `"/home"`)
+
+**Examples**
+
+```javascript
+sys.chdir("/home")
+```
 
 ## getenv
 
@@ -109,6 +213,16 @@ invoke with no arguments to return the whole environment variable object
 
 -   `key` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
+**Examples**
+
+```javascript
+const usingAwait = (await sys.getenv("PATH")).split(":")
+```
+
+```javascript
+const usingPromise = sys.getenv("PATH").then(path => path.split(":"))
+```
+
 Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)>** value
 
 ## setenv
@@ -117,5 +231,11 @@ Set an environment variable to a new value
 
 **Parameters**
 
--   `key` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `""`)
+-   `key` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `value` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `""`)
+
+**Examples**
+
+```javascript
+sys.setenv("varName", "It doesn't have to be all caps")
+```
